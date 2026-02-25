@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cuajito - Asistente UAM</title>
+
+    <!-- IMPORTANTE PARA CELULAR -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-container {
+            width: 100%;
+            height: 100vh;
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .chat-header {
+            background: #0066cc;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: #0066cc;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background-color: #e5e5ea;
+            color: black;
+            border-bottom-left-radius: 5px;
+        }
+
+        .typing {
+            font-style: italic;
+            font-size: 13px;
+            color: gray;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            outline: none;
+            font-size: 16px; /* evita zoom automático en iPhone */
+        }
+
+        .chat-input button {
+            padding: 15px;
+            border: none;
+            background: #0066cc;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background: #004999;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="chat-header">
+        Cuajito 🐻 - Asistente UAM
+    </div>
+
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">
+            Hola 👋 Soy Cuajito. ¿En qué puedo ayudarte?
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="pregunta" placeholder="Escribe tu mensaje...">
+        <button onclick="enviar()">Enviar</button>
+    </div>
+
+</div>
+
+<script>
+
+function enviar() {
+    let input = document.getElementById("pregunta");
+    let mensaje = input.value.trim();
+
+    if (mensaje === "") return;
+
+    let chatBox = document.getElementById("chatBox");
+
+    let userMessage = document.createElement("div");
+    userMessage.className = "message user";
+    userMessage.innerText = mensaje;
+    chatBox.appendChild(userMessage);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+    input.value = "";
+
+    let typing = document.createElement("div");
+    typing.className = "typing";
+    typing.id = "typingIndicator";
+    typing.innerText = "Cuajito está escribiendo...";
+    chatBox.appendChild(typing);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    fetch(`/chat?pregunta=${mensaje}`)
+        .then(response => response.json())
+        .then(data => {
+
+            document.getElementById("typingIndicator").remove();
+
+            let botMessage = document.createElement("div");
+            botMessage.className = "message bot";
+            botMessage.innerText = data.respuesta;
+
+            chatBox.appendChild(botMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+}
+
+document.getElementById("pregunta").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        enviar();
+    }
+});
+
+</script>
+
+</body>
+</html>
