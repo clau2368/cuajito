@@ -1,22 +1,17 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-
+from fastapi import FastAPI
+from pydantic import BaseModel
 from intents import obtener_respuesta
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="templates")
+class ChatRequest(BaseModel):
+    mensaje: str
 
 @app.get("/")
 def inicio():
     return {"mensaje": "Cuajito está en vivo 🐻"}
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get("/chat")
-def chat(pregunta: str):
-    respuesta = obtener_respuesta(pregunta)
+@app.post("/chat")
+def chat(data: ChatRequest):
+    respuesta = obtener_respuesta(data.mensaje)
     return {"respuesta": respuesta}
